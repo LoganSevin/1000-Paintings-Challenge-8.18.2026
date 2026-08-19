@@ -49,9 +49,24 @@ echo.
 echo  Keep THIS window open while you use the gallery.
 echo  On THIS PC:  http://localhost:8765/
 echo.
-echo  On your PHONE (same Wi-Fi — not localhost):
-echo    The server will print "Phone / tablet" URLs when it starts.
-echo    If unreachable, run allow_phone_firewall.bat as Administrator once.
+echo  Enabling Tailscale HTTPS for phone camera...
+if exist "C:\Program Files\Tailscale\tailscale.exe" (
+  "C:\Program Files\Tailscale\tailscale.exe" serve --bg http://127.0.0.1:8765 >nul 2>&1
+)
+echo.
+echo  On YOUR PHONE (camera needs HTTPS — not http://):
+if exist "C:\Program Files\Tailscale\tailscale.exe" (
+  for /f "delims=" %%n in ('python -c "import json,subprocess;d=json.loads(subprocess.check_output([r\"C:\\Program Files\\Tailscale\\tailscale.exe\",\"status\",\"--json\"],text=True));print((d.get(\"Self\") or {}).get(\"DNSName\",\"\").rstrip(\".\"))" 2^>nul') do (
+    echo      https://%%n/
+    echo      Dream + camera:  https://%%n/#dream
+    echo      Spellforge:      https://%%n/#spellforge
+    echo.
+    echo    Plain http://%%n:8765 works for browsing but BLOCKS the camera.
+  )
+) else (
+  echo      Install Tailscale, then run enable_phone_camera.bat
+)
+echo    Phone: Tailscale Connected. If camera still fails: enable_phone_camera.bat
 echo.
 echo  Press Ctrl+C to stop the server.
 echo.
